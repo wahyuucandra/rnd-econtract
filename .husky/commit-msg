@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+message="$(cat $1)"
+requiredPattern="^(add|cut|fix|bump|make|start|stop|refactor|reformat|optimise|document|merge|BREAKING CHANGE|feat|update): .*$"
+if ! [[ $message =~ $requiredPattern ]];
+then
+  echo "-"
+  echo "-"
+  echo "==================================================="
+  echo "||  🚨 Wrong commit message! 😕                 ||"
+  echo "||  The commit message must have this format:    ||"
+  echo "||  <verb in imperative mood> <what was done>    ||"
+  echo "||  Allowed verbs in imperative mood:            ||"
+  echo "||  fix, bump, make, start, stop, refactor,      ||"
+  echo "||  reformat, optimise, document, merge,         ||" 
+  echo "||  BREAKING CHANGE, feat ,add, cut,             ||"
+  echo "||  Example: feat: add login button              ||"
+  echo "==================================================="
+  echo "Your commit message was:"
+  echo "$message"
+  echo "================================================="
+  echo "For more information, check script in https://www.conventionalcommits.org/en/v1.0.0/#summary"
+  echo "================================================="
+  exit 1
+fi
