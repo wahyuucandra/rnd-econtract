@@ -95,14 +95,14 @@ const FaceDetectionOverlay = ({ canvasRef, videoRef, isActive }: Props) => {
         const detection = await detectFace(video);
         if (detection?.expressions) {
           // check if expression is happy
-          const sortedExpressions = Object.entries(detection.expressions).sort(
-            ([, a], [, b]) => b - a
-          );
+          const sortedExpressions = Object.entries(
+            detection.expressions as Record<string, number>
+          ).sort(([, a], [, b]) => (b as number) - (a as number));
 
           // check if expression is happy and confidence is above 0.9
           if (
-            sortedExpressions[0][0] === "happy" &&
-            sortedExpressions[0][1] > 0.9
+            sortedExpressions[0]?.[0] === "happy" &&
+            (sortedExpressions[0]?.[1] as number) > 0.9
           ) {
             setIsSmiling(true);
           } else {

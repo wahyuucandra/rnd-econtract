@@ -1,13 +1,32 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import * as faceapi from "@vladmandic/face-api";
-import { faceDetectionService } from "@/lib/face-detection";
+
+// Dynamic imports to prevent SSR issues
+let faceapi: any = null;
+let faceDetectionService: any = null;
+
+// Initialize face-api only on client side
+const initializeFaceAPI = async () => {
+  if (typeof window === "undefined") return null;
+
+  if (!faceapi) {
+    faceapi = await import("@vladmandic/face-api");
+  }
+  if (!faceDetectionService) {
+    const { faceDetectionService: service } = await import(
+      "@/lib/face-detection"
+    );
+    faceDetectionService = service;
+  }
+
+  return { faceapi, faceDetectionService };
+};
 
 export interface FaceDetectionResult {
-  detection: faceapi.FaceDetection;
-  expressions?: faceapi.FaceExpressions;
-  landmarks?: faceapi.FaceLandmarks68;
+  detection: any; // faceapi.FaceDetection
+  expressions?: any; // faceapi.FaceExpressions
+  landmarks?: any; // faceapi.FaceLandmarks68
   angle: { roll: number; yaw: number; pitch: number };
 }
 
@@ -37,19 +56,32 @@ export function useFaceDetection(): UseFaceDetectionReturn {
   const [hasModels, setHasModels] = useState(false); // Track model availability
 
   useEffect(() => {
-    const initializeFaceAPI = async () => {
+    const initializeFaceDetection = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        await faceDetectionService.initialize();
+        // Only run on client side
+        if (typeof window === "undefined") {
+          setIsLoading(false);
+          return;
+        }
 
-        const initError = faceDetectionService.getInitializationError();
+        const apis = await initializeFaceAPI();
+        if (!apis) {
+          setError("Failed to load face detection APIs");
+          setIsLoading(false);
+          return;
+        }
+
+        await apis.faceDetectionService.initialize();
+
+        const initError = apis.faceDetectionService.getInitializationError();
         if (initError) {
           setError(initError);
         }
 
-        const modelsAvailable = faceDetectionService.hasModels();
+        const modelsAvailable = apis.faceDetectionService.hasModels();
         setHasModels(modelsAvailable);
         setIsReady(modelsAvailable);
       } catch (err) {
@@ -63,14 +95,14 @@ export function useFaceDetection(): UseFaceDetectionReturn {
       }
     };
 
-    initializeFaceAPI();
+    initializeFaceDetection();
   }, []);
 
   const detectFace = useCallback(
     async (
       element: HTMLVideoElement | HTMLCanvasElement | HTMLImageElement
     ): Promise<FaceDetectionResult | null> => {
-      if (!isReady) {
+      if (!isReady || !faceDetectionService) {
         return null;
       }
 
@@ -101,8 +133,6 @@ export function useFaceDetection(): UseFaceDetectionReturn {
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
         return null;
-      } finally {
-        setIsLoading(false);
       }
     },
     [isReady]
@@ -115,7 +145,7 @@ export function useFaceDetection(): UseFaceDetectionReturn {
       displaySize: { width: number; height: number }
     ) => {
       const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+      if (!ctx || !faceapi) return;
 
       // Clear previous drawings
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -153,7 +183,7 @@ export function useFaceDetection(): UseFaceDetectionReturn {
       element: HTMLVideoElement | HTMLCanvasElement | HTMLImageElement,
       marginPercent: number = 30
     ): Promise<string | null> => {
-      if (!isReady) {
+      if (!isReady || !faceDetectionService) {
         return null;
       }
 

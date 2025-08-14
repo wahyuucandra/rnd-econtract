@@ -1,6 +1,15 @@
 "use client";
 
-import * as faceapi from "@vladmandic/face-api";
+// Dynamic import to prevent SSR issues
+let faceapi: any = null;
+
+const loadFaceAPI = async () => {
+  if (typeof window === "undefined") return null;
+  if (!faceapi) {
+    faceapi = await import("@vladmandic/face-api");
+  }
+  return faceapi;
+};
 
 export class FaceDetectionService {
   private static instance: FaceDetectionService;
@@ -58,6 +67,14 @@ export class FaceDetectionService {
     }
 
     try {
+      // Load face-api dynamically
+      const api = await loadFaceAPI();
+      if (!api) {
+        this.initializationError = "Face API not available on server side";
+        this.isInitialized = true;
+        return;
+      }
+
       const modelsAvailable = await this.checkModelAvailability();
 
       if (!modelsAvailable) {
@@ -71,14 +88,14 @@ export class FaceDetectionService {
       // Load face detection model
       const MODEL_URL = "/models";
 
-      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+      await api.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
 
       // Try to load expression model if available
       const expressionModelsAvailable =
         await this.checkExpressionModelAvailability();
       if (expressionModelsAvailable) {
         try {
-          await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+          await api.nets.faceExpressionNet.loadFromUri(MODEL_URL);
           this.expressionModelLoaded = true;
         } catch (error) {
           this.expressionModelLoaded = false;
@@ -92,7 +109,7 @@ export class FaceDetectionService {
         await this.checkLandmarkModelAvailability();
       if (landmarkModelsAvailable) {
         try {
-          await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+          await api.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
           this.landmarkModelLoaded = true;
         } catch (error) {
           this.landmarkModelLoaded = false;
@@ -112,8 +129,8 @@ export class FaceDetectionService {
 
   async detectSingleFace(
     input: HTMLVideoElement | HTMLCanvasElement | HTMLImageElement
-  ): Promise<faceapi.FaceDetection | null> {
-    if (!this.isInitialized || !this.modelsLoaded) {
+  ): Promise<any> {
+    if (!this.isInitialized || !this.modelsLoaded || !faceapi) {
       return null; // Return null instead of throwing error
     }
 
@@ -132,7 +149,7 @@ export class FaceDetectionService {
   async detectSingleFaceWithExpressions(
     input: HTMLVideoElement | HTMLCanvasElement | HTMLImageElement
   ): Promise<any> {
-    if (!this.isInitialized || !this.modelsLoaded) {
+    if (!this.isInitialized || !this.modelsLoaded || !faceapi) {
       return null;
     }
 
