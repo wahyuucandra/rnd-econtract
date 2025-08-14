@@ -1,14 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
+  // webpack config to handle face-api.esm.js warning
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /face-api.esm.js/,
+      type: "javascript/esm",
+    });
+    return config;
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    unoptimized: true,
-  },
-}
+};
 
-export default nextConfig
+export default nextConfig;
