@@ -3,14 +3,7 @@
 import { useCallback, useState } from "react";
 import { useFaceDetection } from "./use-face-detection";
 import { toast } from "@/components/ui/use-toast";
-
-export interface FaceCaptureOptions {
-  marginPercent?: number;
-  autoDownload?: boolean;
-  filename?: string;
-  onSuccess?: (imageDataUrl: string) => void;
-  onError?: (error: string) => void;
-}
+import type { FaceCaptureOptions } from "@/types/face-detection";
 
 export interface UseFaceCaptureReturn {
   captureImage: (
@@ -151,16 +144,21 @@ export const useFaceCapture = (): UseFaceCaptureReturn => {
         }
 
         // Check if the desired expression meets the threshold
-        const expressionValue = detection.expressions[expression as keyof typeof detection.expressions];
-        
+        const expressionValue =
+          detection.expressions[
+            expression as keyof typeof detection.expressions
+          ];
+
         if (expressionValue && expressionValue >= threshold) {
           // Expression detected, capture the image
           return await captureImage(element, {
             ...options,
-            filename: options.filename || `${expression}-capture-${new Date()
-              .toISOString()
-              .slice(0, 19)
-              .replace(/:/g, "-")}.png`,
+            filename:
+              options.filename ||
+              `${expression}-capture-${new Date()
+                .toISOString()
+                .slice(0, 19)
+                .replace(/:/g, "-")}.png`,
           });
         } else {
           const errorMsg = `${expression} expression not detected with sufficient confidence (${threshold})`;

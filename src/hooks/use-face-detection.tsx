@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import type { FaceDetectionResult, DisplaySize } from "@/types/face-detection";
 
 // Dynamic imports to prevent SSR issues
 let faceapi: any = null;
@@ -23,13 +24,6 @@ const initializeFaceAPI = async () => {
   return { faceapi, faceDetectionService };
 };
 
-export interface FaceDetectionResult {
-  detection: any; // faceapi.FaceDetection
-  expressions?: any; // faceapi.FaceExpressions
-  landmarks?: any; // faceapi.FaceLandmarks68
-  angle: { roll: number; yaw: number; pitch: number };
-}
-
 export interface UseFaceDetectionReturn {
   isLoading: boolean;
   isReady: boolean;
@@ -41,7 +35,7 @@ export interface UseFaceDetectionReturn {
   drawDetection: (
     canvas: HTMLCanvasElement,
     detection: FaceDetectionResult | null,
-    displaySize: { width: number; height: number }
+    displaySize: DisplaySize
   ) => void;
   captureFaceImage: (
     element: HTMLVideoElement | HTMLCanvasElement | HTMLImageElement,
@@ -142,7 +136,7 @@ export function useFaceDetection(): UseFaceDetectionReturn {
     (
       canvas: HTMLCanvasElement,
       detection: FaceDetectionResult | null,
-      displaySize: { width: number; height: number }
+      displaySize: DisplaySize
     ) => {
       const ctx = canvas.getContext("2d");
       if (!ctx || !faceapi) return;

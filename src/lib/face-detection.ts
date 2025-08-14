@@ -129,7 +129,7 @@ export class FaceDetectionService {
 
   async detectSingleFace(
     input: HTMLVideoElement | HTMLCanvasElement | HTMLImageElement
-  ): Promise<any> {
+  ): Promise<any | null> {
     if (!this.isInitialized || !this.modelsLoaded || !faceapi) {
       return null; // Return null instead of throwing error
     }

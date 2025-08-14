@@ -3,11 +3,7 @@ import { toast } from "@/components/ui/use-toast";
 import React, { useState, useEffect } from "react";
 import { useFaceCapture } from "@/hooks/use-face-capture";
 import { Camera, Download } from "lucide-react";
-
-interface CameraDevice {
-  deviceId: string;
-  label: string;
-}
+import type { CameraDevice } from "@/types/face-detection";
 
 type Props = {
   videoRef: React.RefObject<HTMLVideoElement | null>;
