@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, Loader2, Upload, XCircle } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface ApiResponse {
@@ -26,9 +27,10 @@ export default function FileUploadTest() {
   const [error, setError] = useState<string | null>(null);
   const [apiBaseUrl, setApiBaseUrl] = useState(
     process.env.NEXT_PUBLIC_API_BASE_URL ||
-      "https://02c6589b1c28.ngrok-free.app"
+    "https://02c6589b1c28.ngrok-free.app"
   );
   const [activeTab, setActiveTab] = useState("quality");
+  const router = useRouter();
 
   const handleFileUpload = async (
     endpoint: string,
@@ -53,9 +55,8 @@ export default function FileUploadTest() {
         queryParams.append(key, value.toString());
       });
 
-      const url = `${apiBaseUrl}${endpoint}${
-        queryParams.toString() ? `?${queryParams.toString()}` : ""
-      }`;
+      const url = `${apiBaseUrl}${endpoint}${queryParams.toString() ? `?${queryParams.toString()}` : ""
+        }`;
 
       const res = await fetch(url, {
         method: "POST",
@@ -322,10 +323,22 @@ export default function FileUploadTest() {
         <CardHeader>
           <CardTitle>API Configuration</CardTitle>
           <CardDescription>Set the base URL for the API</CardDescription>
+          <Button
+            className="text-white"
+            onClick={() => {
+              router.push("/face-detection");
+            }}
+          >Go to Face Detection</Button>
+          <Button
+            className="text-white"
+            onClick={() => {
+              router.push("/liveness");
+            }}
+          >Go to Liveness Check</Button>
         </CardHeader>
         <CardContent>
           <div>
-            <Label htmlFor="api-url">API Base URL</Label>
+            <Label className="mb-2" htmlFor="api-url">API Base URL</Label>
             <Input
               id="api-url"
               value={apiBaseUrl}
