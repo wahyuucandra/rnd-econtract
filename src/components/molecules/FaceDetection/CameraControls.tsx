@@ -1,4 +1,5 @@
 "use client";
+
 import { toast } from "@/components/ui/use-toast";
 import React, { useState, useEffect } from "react";
 import { useFaceCapture } from "@/hooks/use-face-capture";
@@ -11,7 +12,6 @@ type Props = {
   onImageCaptured?: (imageDataUrl: string) => void;
 };
 
-// Export the capture functions for external use
 export const useCameraCapture = (
   videoRef: React.RefObject<HTMLVideoElement | null>
 ) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,8 +12,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Upload, CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, Loader2, Upload, XCircle } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
 
 interface ApiResponse {
   [key: string]: any;
@@ -421,10 +422,12 @@ export default function FileUploadTest() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <img
+            <Image
               src={`data:image/png;base64,${response.signature_png_b64}`}
               alt="Signature"
               className="w-full max-w-xs"
+              width={500}
+              height={500}
             />
           </CardContent>
         </Card>
@@ -438,10 +441,12 @@ export default function FileUploadTest() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <img
+            <Image
               src={`data:image/png;base64,${response.overlay_png_b64}`}
-              alt="Signature"
+              alt="Overlay"
               className="w-full max-w-xs"
+              width={500}
+              height={500}
             />
           </CardContent>
         </Card>
