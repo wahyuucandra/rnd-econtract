@@ -138,6 +138,14 @@ const FaceDetectionOverlay = ({ canvasRef, videoRef, isActive }: Props) => {
             setIsRollLeft(false);
             setIsRollRight(false);
           }
+        } else {
+          setIsSmiling(false);
+          setIsYawLeft(false);
+          setIsYawRight(false);
+          setIsPitchUp(false);
+          setIsPitchDown(false);
+          setIsRollLeft(false);
+          setIsRollRight(false);
         }
 
         // Update canvas size to match video
