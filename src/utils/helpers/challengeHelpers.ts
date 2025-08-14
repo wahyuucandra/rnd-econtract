@@ -1,4 +1,5 @@
 import { ChallengeType } from "@/interface/challenge";
+import { secureSample, secureShuffle } from "./random";
 
 export const allChallenges: ChallengeType[] = [
   "senyum",
@@ -15,11 +16,14 @@ export const allChallenges: ChallengeType[] = [
 
 export function getRandomChallenges(count: number): ChallengeType[] {
   const wajibPool: ChallengeType[] = ["kedip", "geleng_kepala", "senyum_netral", "anggukan_kepala"];
-  const wajib = [...wajibPool].sort(() => Math.random() - 0.5).slice(0, 2);
-  const sisa = allChallenges.filter((c) => !wajib.includes(c));
-  const tambahan = [...sisa].sort(() => Math.random() - 0.5).slice(0, Math.max(0, count - wajib.length));
 
-  return [...wajib, ...tambahan].sort(() => Math.random() - 0.5);
+  const wajib = secureSample(wajibPool, Math.min(2, wajibPool.length));
+
+  const sisa = allChallenges.filter((c) => !wajib.includes(c));
+  const needed = Math.max(0, Math.min(count, allChallenges.length) - wajib.length);
+  const tambahan = secureSample(sisa, needed);
+  
+  return secureShuffle([...wajib, ...tambahan]);
 }
 
 export function readableType(t: ChallengeType) {
