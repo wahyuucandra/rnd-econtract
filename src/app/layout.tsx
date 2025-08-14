@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
+import { CameraProvider } from "@/providers/CameraProvider";
 
 export const metadata: Metadata = {
   title: "File Upload Test",
@@ -14,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body><CameraProvider>{children}</CameraProvider></body>
     </html>
   );
 }
