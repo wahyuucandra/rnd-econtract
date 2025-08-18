@@ -12,10 +12,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Loader2, Upload, XCircle } from "lucide-react";
+import {
+  CheckCircle,
+  Loader2,
+  Upload,
+  XCircle,
+  RotateCcw,
+  Save,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import SignatureCanvas from "react-signature-canvas";
 
 interface ApiResponse {
   [key: string]: any;
@@ -27,10 +35,12 @@ export default function FileUploadTest() {
   const [error, setError] = useState<string | null>(null);
   const [apiBaseUrl, setApiBaseUrl] = useState(
     process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "https://02c6589b1c28.ngrok-free.app"
+      "https://02c6589b1c28.ngrok-free.app"
   );
   const [activeTab, setActiveTab] = useState("quality");
+  const [savedSignature, setSavedSignature] = useState<string | null>(null);
   const router = useRouter();
+  const signatureRef = useRef<SignatureCanvas>(null);
 
   const handleFileUpload = async (
     endpoint: string,
@@ -55,8 +65,9 @@ export default function FileUploadTest() {
         queryParams.append(key, value.toString());
       });
 
-      const url = `${apiBaseUrl}${endpoint}${queryParams.toString() ? `?${queryParams.toString()}` : ""
-        }`;
+      const url = `${apiBaseUrl}${endpoint}${
+        queryParams.toString() ? `?${queryParams.toString()}` : ""
+      }`;
 
       const res = await fetch(url, {
         method: "POST",
@@ -309,6 +320,58 @@ export default function FileUploadTest() {
     );
   };
 
+  const SignatureDrawTab = () => {
+    const handleReset = () => {
+      if (signatureRef.current) {
+        signatureRef.current.clear();
+      }
+    };
+
+    const handleSave = () => {
+      if (signatureRef.current) {
+        const signatureData = signatureRef.current.toDataURL();
+        setSavedSignature(signatureData);
+      }
+    };
+
+    return (
+      <div className="space-y-4">
+        <div>
+          <Label>Draw Your Signature</Label>
+          <div className="border border-gray-300 rounded-lg p-2 bg-white relative w-full h-[200px]">
+            <SignatureCanvas
+              ref={signatureRef}
+              backgroundColor="rgb(255, 255, 255)"
+              penColor="black"
+              minWidth={1}
+              maxWidth={3}
+              canvasProps={{
+                style: {
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                },
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <Button onClick={handleReset} variant="outline" className="flex-1">
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Reset
+          </Button>
+          <Button onClick={handleSave} className="flex-1">
+            <Save className="mr-2 h-4 w-4" />
+            Save Signature
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-6">
@@ -328,17 +391,23 @@ export default function FileUploadTest() {
             onClick={() => {
               router.push("/face-detection");
             }}
-          >Go to Face Detection</Button>
+          >
+            Go to Face Detection
+          </Button>
           <Button
             className="text-white"
             onClick={() => {
               router.push("/liveness");
             }}
-          >Go to Liveness Check</Button>
+          >
+            Go to Liveness Check
+          </Button>
         </CardHeader>
         <CardContent>
           <div>
-            <Label className="mb-2" htmlFor="api-url">API Base URL</Label>
+            <Label className="mb-2" htmlFor="api-url">
+              API Base URL
+            </Label>
             <Input
               id="api-url"
               value={apiBaseUrl}
@@ -355,10 +424,11 @@ export default function FileUploadTest() {
         value={activeTab}
         onValueChange={setActiveTab}
       >
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="quality">Quality Check</TabsTrigger>
           <TabsTrigger value="signature">Signature Extract</TabsTrigger>
           <TabsTrigger value="face-compare">Face Compare</TabsTrigger>
+          <TabsTrigger value="signature-draw">Draw Signature</TabsTrigger>
         </TabsList>
 
         <TabsContent value="quality" key="quality">
@@ -399,6 +469,20 @@ export default function FileUploadTest() {
             </CardHeader>
             <CardContent>
               <FaceCompareTab />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="signature-draw" key="signature-draw">
+          <Card>
+            <CardHeader>
+              <CardTitle>Draw Signature</CardTitle>
+              <CardDescription>
+                Draw your signature using the canvas below
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SignatureDrawTab />
             </CardContent>
           </Card>
         </TabsContent>
@@ -460,6 +544,25 @@ export default function FileUploadTest() {
               className="w-full max-w-xs"
               width={500}
               height={500}
+            />
+          </CardContent>
+        </Card>
+      )}
+      {activeTab === "signature-draw" && savedSignature && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              Saved Signature
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Image
+              src={savedSignature}
+              alt="Saved Signature"
+              className="w-full max-w-xs border border-gray-300 rounded-lg"
+              width={500}
+              height={200}
             />
           </CardContent>
         </Card>
