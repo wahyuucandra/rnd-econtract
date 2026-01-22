@@ -4,8 +4,8 @@ import "./globals.css";
 import { CameraProvider } from "@/providers/CameraProvider";
 
 export const metadata: Metadata = {
-  title: "File Upload Test",
-  description: "File Upload Test",
+  title: "RND - Liveness Detection",
+  description: "Belajar implementasi liveness detection menggunakan face-api.js",
 };
 
 export default function RootLayout({
